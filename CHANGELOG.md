@@ -4,6 +4,13 @@ All notable changes to `laravel-clipboard-core` are documented here.
 
 This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Until 1.0.0, minor versions may contain breaking changes to contracts; patch versions will not.
 
+## v0.2.0 - 2026-08-29
+
+### Added
+
+- `ProcessClipboardSource`, which reads pasteboard state from a native helper over a documented one-JSON-object-per-line protocol. This is what makes the nspasteboard concealed-type convention enforceable: a conforming helper never emits the text of a concealed item, so secret content never enters PHP. Text arriving alongside `concealed: true` is discarded regardless, so the guarantee does not rest on every helper being written correctly.
+- `clipboard.probe.command` configuration. Unset by default, in which case reads continue through the runtime exactly as before.
+
 ## v0.1.1 - 2026-08-29
 
 ### Fixed

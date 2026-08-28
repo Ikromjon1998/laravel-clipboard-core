@@ -102,4 +102,26 @@ return [
 
     'suppression_ttl_seconds' => 10,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Native probe
+    |--------------------------------------------------------------------------
+    |
+    | An optional helper process that reports pasteboard changes as JSON
+    | lines. It exists to see what a cross-platform runtime cannot: on macOS,
+    | applications mark secret contents with custom pasteboard types that
+    | Electron cannot read, so without a helper a clipboard manager records
+    | what you copy out of a password manager.
+    |
+    | Give it the command to run, as an argument list. Leave it null to fall
+    | back to reading through the runtime, and see ProcessClipboardSource for
+    | the protocol a helper must speak.
+    |
+    */
+
+    'probe' => [
+        'command' => array_values(array_filter(explode(' ', (string) env('CLIPBOARD_PROBE_COMMAND', '')))),
+        'restart_backoff_seconds' => 5,
+    ],
+
 ];

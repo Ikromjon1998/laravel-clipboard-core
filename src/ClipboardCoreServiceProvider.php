@@ -19,6 +19,7 @@ use Ikromjon\ClipboardCore\Paste\CopyOnlyStrategy;
 use Ikromjon\ClipboardCore\Repositories\DatabaseClipRepository;
 use Ikromjon\ClipboardCore\Sources\ArrayClipboardSource;
 use Ikromjon\ClipboardCore\Sources\NativePhpClipboardSource;
+use Ikromjon\ClipboardCore\Sources\ProcessClipboardSource;
 use Ikromjon\ClipboardCore\Support\FilePauseSwitch;
 use Ikromjon\ClipboardCore\Support\FileSuppressionLog;
 use Ikromjon\ClipboardCore\Support\Fingerprint;
@@ -56,11 +57,24 @@ class ClipboardCoreServiceProvider extends ServiceProvider
 
     private function bindContracts(): void
     {
-        // Falls back to an in-memory pasteboard when NativePHP is absent, so
-        // the package installs and its tests run in a plain Laravel app.
-        $this->app->bind(ClipboardSource::class, fn (): ClipboardSource => class_exists(NativeClipboard::class)
-            ? new NativePhpClipboardSource
-            : new ArrayClipboardSource);
+        // Reading and writing can come from different places: a native probe
+        // sees pasteboard types the runtime cannot, but only observes, so
+        // writes still go through the runtime.
+        $this->app->bind(ClipboardSource::class, function (): ClipboardSource {
+            $writer = class_exists(NativeClipboard::class)
+                ? new NativePhpClipboardSource
+                : new ArrayClipboardSource;
+
+            $command = $this->probeCommand();
+
+            return $command === []
+                ? $writer
+                : new ProcessClipboardSource(
+                    $command,
+                    $writer,
+                    $this->intConfig('clipboard.probe.restart_backoff_seconds', 5),
+                );
+        });
 
         $this->app->bind(ClipRepository::class, DatabaseClipRepository::class);
 
@@ -122,6 +136,23 @@ class ClipboardCoreServiceProvider extends ServiceProvider
             events: $app->make(Dispatcher::class),
             limit: $this->intConfig('clipboard.limit', 100),
         ));
+    }
+
+    /** @return list<string> */
+    private function probeCommand(): array
+    {
+        $command = config('clipboard.probe.command', []);
+
+        if (! is_array($command)) {
+            return [];
+        }
+
+        $parts = array_values(array_filter(
+            array_map(fn ($part) => is_string($part) ? $part : null, $command),
+        ));
+
+        // A configured but missing binary must not stop the app booting.
+        return ($parts !== [] && is_executable($parts[0])) ? $parts : [];
     }
 
     private function intConfig(string $key, int $default): int

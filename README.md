@@ -156,7 +156,7 @@ Every default is bound by interface, so swapping one is a single `bind()` in you
 
 | Contract | Default | Swap it when |
 | --- | --- | --- |
-| `ClipboardSource` | `NativePhpClipboardSource` | You have a native helper, or you are testing |
+| `ClipboardSource` | `NativePhpClipboardSource`, or `ProcessClipboardSource` when a probe is configured | You are testing, or reading from somewhere else entirely |
 | `ClipRepository` | `DatabaseClipRepository` | You want encryption, sync, or memory-only storage |
 | `PrivacyGuard` | blank + concealed + size guards | You need per-app exclusions or secret detection |
 | `PasteStrategy` | `CopyOnlyStrategy` | You can synthesise a paste keystroke |
@@ -170,6 +170,35 @@ $this->app->bind(PrivacyGuard::class, fn () => new CompositeGuard(
     new NeverFromPasswordManagers,   // your own
 ));
 ```
+
+## Seeing what the runtime cannot
+
+Some pasteboard state is invisible to a cross-platform runtime. On macOS, applications mark secret contents with custom pasteboard types that Electron does not expose — which is exactly the information a clipboard manager needs in order to *not* record your passwords.
+
+`ProcessClipboardSource` reads from a long-running helper that can see them, over a deliberately small protocol: one JSON object per line on stdout.
+
+```
+{"change":42,"concealed":false,"app":"Safari","text":"hello"}
+{"change":43,"concealed":true,"app":"1Password"}
+{"change":44,"concealed":false,"app":"Xcode","oversize":true}
+```
+
+| Field | Meaning |
+| --- | --- |
+| `change` | Monotonic counter; emitted only when something changed |
+| `concealed` | The owning application marked this secret — **omit `text`** |
+| `app` | Frontmost application, for exclusion rules (optional) |
+| `text` | The contents; absent when concealed, oversize, or not text |
+| `oversize` | Text existed but exceeded the helper's byte ceiling |
+
+Point the package at one and it takes over reading; writes continue through the runtime, because a probe only observes:
+
+```php
+// config/clipboard.php
+'probe' => ['command' => ['/path/to/clipboard-probe', '--interval-ms', '150']],
+```
+
+The protocol is intentionally implementable in any language. A reference macOS helper in ~140 lines of Swift lives in [laravel-clipboard](https://github.com/Ikromjon1998/laravel-clipboard/blob/main/native/ClipboardProbe.swift); it polls `NSPasteboard.changeCount`, which is a plain integer, so idle cost is one comparison and it can poll several times a second without measurable expense.
 
 ## Testing without a desktop
 
@@ -204,7 +233,11 @@ The watcher exposes a single `tick()` rather than owning a loop, so the caller c
 
 Guards run before anything reaches the database, so a rejected clip leaves no trace on disk. `NotConcealedGuard` honours the [nspasteboard.org](https://nspasteboard.org) convention that password managers use to mark contents concealed or transient.
 
-**But it can only honour what the source reports.** Electron's clipboard API cannot read custom pasteboard types, so `NativePhpClipboardSource` always reports `concealed: false` and the guard passes everything through. Enforcing that convention requires a native helper that reads `org.nspasteboard.ConcealedType` into a `ClipboardSnapshot`. Until you have one, treat "never logs passwords" as unenforced and give users a visible pause control.
+**It can only honour what the source reports**, and that depends on which source you use.
+
+`NativePhpClipboardSource` reads through Electron, which cannot see custom pasteboard types. It therefore always reports `concealed: false`, the guard passes everything through, and copies from a password manager *are* recorded. If that is your setup, treat "never logs passwords" as unenforced and give users a visible pause control.
+
+`ProcessClipboardSource` fixes this by reading from a native helper that can see those types. The guarantee is structural rather than a check: a conforming helper never emits the text of a concealed item, so secret content does not enter PHP at all and no bug on this side can write it to disk. As a second line of defence, text arriving alongside `concealed: true` is discarded on arrival anyway.
 
 Clip content is stored as plaintext in your application's database, protected by file permissions. Encryption at rest is not provided — bind your own `ClipRepository` if you need it.
 
