@@ -1,0 +1,68 @@
+{
+    "name": "ikromjon/laravel-clipboard-core",
+    "description": "The clipboard-watching and history engine behind laravel-clipboard: a framework-agnostic, UI-free Laravel package for capturing, deduplicating, and pruning clipboard history",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "nativephp",
+        "desktop",
+        "clipboard",
+        "clipboard-manager",
+        "clipboard-history",
+        "laravel"
+    ],
+    "authors": [
+        {
+            "name": "Ikromjon Ochilov",
+            "email": "ikromjon98.98@icloud.com"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "illuminate/console": "^11.0||^12.0||^13.0",
+        "illuminate/database": "^11.0||^12.0||^13.0",
+        "illuminate/support": "^11.0||^12.0||^13.0"
+    },
+    "require-dev": {
+        "larastan/larastan": "^3.0",
+        "laravel/pint": "^1.28",
+        "orchestra/testbench": "^9.0||^10.0||^11.0",
+        "pestphp/pest": "^3.0",
+        "phpstan/phpstan": "^2.0"
+    },
+    "suggest": {
+        "nativephp/desktop": "Required for the NativePHP clipboard source, which reads the real system pasteboard (^2.0)"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ikromjon\\ClipboardCore\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Ikromjon\\ClipboardCore\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/pest",
+        "test:coverage": "vendor/bin/pest --coverage",
+        "lint": "vendor/bin/pint",
+        "lint:test": "vendor/bin/pint --test",
+        "analyse": "vendor/bin/phpstan analyse"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        },
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Ikromjon\\ClipboardCore\\ClipboardCoreServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

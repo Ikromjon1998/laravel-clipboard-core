@@ -1,0 +1,20 @@
+# Changelog
+
+All notable changes to `laravel-clipboard-core` are documented here.
+
+This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Until 1.0.0, minor versions may contain breaking changes to contracts; patch versions will not.
+
+## [Unreleased]
+
+### Added
+
+- `ClipboardSource` contract with a NativePHP implementation and an in-memory `ArrayClipboardSource` for testing.
+- `ClipboardWatcher` engine exposing a single `tick()`, with fingerprint-based change detection, self-write suppression, and adaptive `Cadence` (hot/warm/cold).
+- `ClipRepository` contract and a SQLite-friendly `DatabaseClipRepository` implementing ring-buffer pruning that exempts pinned clips, and upsert deduplication that resurfaces repeats.
+- `PrivacyGuard` contract with blank, size, and nspasteboard concealed-type guards, composed so any one refusal blocks a capture.
+- `PasteStrategy` contract with a permission-free `CopyOnlyStrategy` default.
+- `PauseSwitch` contract with a file-based implementation for cross-process pausing.
+- `SuppressionLog` contract with an expiring, file-based implementation, so a clip pasted from history is not recaptured by a watcher running in another process.
+- `ClipboardHistory` service and facade as the package's front door.
+- `clipboard:watch` command with `--once` and `--ticks=` for testing.
+- Events: `ClipCaptured`, `ClipsPruned`, `ClipRejected`, `WatcherPaused`, `WatcherResumed`.

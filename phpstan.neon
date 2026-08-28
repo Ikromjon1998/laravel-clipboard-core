@@ -1,0 +1,14 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - src
+
+    level: 8
+
+    # The only file that touches NativePHP. Core deliberately does not depend
+    # on nativephp/desktop, so that class is absent here by design; keeping it
+    # out of analysis is what proves the package installs without a desktop.
+    excludePaths:
+        - src/Sources/NativePhpClipboardSource.php
