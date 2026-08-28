@@ -6,6 +6,10 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Supported versions
+
+- PHP 8.3+, Laravel 12 and 13. Laravel 11 is not supported: every 11.x release is now flagged by a security advisory, so Composer refuses to install it under its default policy.
+
 ### Added
 
 - `ClipboardSource` contract with a NativePHP implementation and an in-memory `ArrayClipboardSource` for testing.

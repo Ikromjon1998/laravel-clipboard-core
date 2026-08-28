@@ -125,7 +125,7 @@ Clip content is stored as plaintext in your application's database, protected by
 
 ## Requirements
 
-PHP 8.3+, Laravel 11/12/13. `nativephp/desktop` ^2.0 is optional: without it the package falls back to an in-memory source, so it installs and tests cleanly in a plain Laravel app.
+PHP 8.3+, Laravel 12 or 13. `nativephp/desktop` ^2.0 is optional: without it the package falls back to an in-memory source, so it installs and tests cleanly in a plain Laravel app.
 
 ## Contributing
 
