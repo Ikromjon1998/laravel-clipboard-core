@@ -116,6 +116,9 @@ class ClipboardCoreServiceProvider extends ServiceProvider
             clips: $app->make(ClipRepository::class),
             paste: $app->make(PasteStrategy::class),
             pause: $app->make(PauseSwitch::class),
+            clipboard: $app->make(ClipboardSource::class),
+            suppressions: $app->make(SuppressionLog::class),
+            fingerprint: $app->make(Fingerprint::class),
             events: $app->make(Dispatcher::class),
             limit: $this->intConfig('clipboard.limit', 100),
         ));

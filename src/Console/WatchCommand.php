@@ -51,8 +51,10 @@ class WatchCommand extends Command
             }
 
             if ($wasPaused) {
-                // Anything copied during the pause stays uncaptured.
-                $watcher->resync();
+                // No resync here on purpose. ClipboardHistory::resume()
+                // already recorded the clipboard as it stood when the user
+                // resumed; baselining again now would swallow anything they
+                // copied between that moment and this poll.
                 $this->line('watcher: resumed');
                 $wasPaused = false;
             }

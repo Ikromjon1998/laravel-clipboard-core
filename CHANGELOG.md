@@ -4,6 +4,12 @@ All notable changes to `laravel-clipboard-core` are documented here.
 
 This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Until 1.0.0, minor versions may contain breaking changes to contracts; patch versions will not.
 
+## v0.1.1 - 2026-08-29
+
+### Fixed
+
+- A clip copied immediately after resuming could be silently dropped. The watcher only observes a resume on its next poll, and it used to baseline change detection at that moment — so anything copied in the gap was mistaken for paused-era content. `ClipboardHistory::resume()` now records the clipboard as it stood when the user resumed, which is the only point in the sequence without a race.
+
 ## v0.1.0 - 2026-08-29
 
 First release. The engine is complete and tested; contracts may still change before 1.0.

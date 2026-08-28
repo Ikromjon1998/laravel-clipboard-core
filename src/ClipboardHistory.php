@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Ikromjon\ClipboardCore;
 
+use Ikromjon\ClipboardCore\Contracts\ClipboardSource;
 use Ikromjon\ClipboardCore\Contracts\ClipRepository;
 use Ikromjon\ClipboardCore\Contracts\PasteStrategy;
 use Ikromjon\ClipboardCore\Contracts\PauseSwitch;
+use Ikromjon\ClipboardCore\Contracts\SuppressionLog;
 use Ikromjon\ClipboardCore\Events\WatcherPaused;
 use Ikromjon\ClipboardCore\Events\WatcherResumed;
 use Ikromjon\ClipboardCore\Models\Clip;
+use Ikromjon\ClipboardCore\Support\Fingerprint;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Collection;
 
@@ -26,6 +29,9 @@ class ClipboardHistory
         private readonly ClipRepository $clips,
         private readonly PasteStrategy $paste,
         private readonly PauseSwitch $pause,
+        private readonly ClipboardSource $clipboard,
+        private readonly SuppressionLog $suppressions,
+        private readonly Fingerprint $fingerprint,
         private readonly Dispatcher $events,
         private readonly int $limit,
     ) {}
@@ -102,6 +108,21 @@ class ClipboardHistory
     {
         if (! $this->pause->isPaused()) {
             return;
+        }
+
+        // Mark whatever is on the clipboard *now* as already-handled, before
+        // clearing the flag. Anything copied during the pause was deliberately
+        // not captured and resuming must not capture it retroactively.
+        //
+        // Doing this here rather than in the watcher matters: the watcher only
+        // notices a resume on its next poll, and a clip copied in that gap
+        // would otherwise be mistaken for paused-era content and dropped.
+        $snapshot = $this->clipboard->read();
+
+        if ($snapshot->text !== null) {
+            $this->suppressions->suppress(
+                $this->fingerprint->of($this->fingerprint->normalise($snapshot->text)),
+            );
         }
 
         $this->pause->resume();
