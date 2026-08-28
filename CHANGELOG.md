@@ -4,7 +4,9 @@ All notable changes to `laravel-clipboard-core` are documented here.
 
 This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Until 1.0.0, minor versions may contain breaking changes to contracts; patch versions will not.
 
-## [Unreleased]
+## v0.1.0 - 2026-08-29
+
+First release. The engine is complete and tested; contracts may still change before 1.0.
 
 ### Supported versions
 
