@@ -2,7 +2,7 @@
 
 [![Latest version on Packagist](https://img.shields.io/packagist/v/ikromjon/laravel-clipboard-core.svg?style=flat-square)](https://packagist.org/packages/ikromjon/laravel-clipboard-core)
 [![Tests](https://img.shields.io/github/actions/workflow/status/Ikromjon1998/laravel-clipboard-core/tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/Ikromjon1998/laravel-clipboard-core/actions/workflows/tests.yml)
-[![PHPStan](https://img.shields.io/badge/PHPStan-level%208-brightgreen.svg?style=flat-square)](https://phpstan.org/)
+[![Quality](https://img.shields.io/github/actions/workflow/status/Ikromjon1998/laravel-clipboard-core/quality.yml?branch=main&label=phpstan%20%2B%20pint&style=flat-square)](https://github.com/Ikromjon1998/laravel-clipboard-core/actions/workflows/quality.yml)
 [![Total downloads](https://img.shields.io/packagist/dt/ikromjon/laravel-clipboard-core.svg?style=flat-square)](https://packagist.org/packages/ikromjon/laravel-clipboard-core)
 [![License](https://img.shields.io/packagist/l/ikromjon/laravel-clipboard-core.svg?style=flat-square)](LICENSE)
 

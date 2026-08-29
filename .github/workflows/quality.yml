@@ -1,0 +1,32 @@
+name: quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Separate from the test matrix so its badge reports on this alone. A badge
+# that cannot fail tells the reader nothing.
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    name: static analysis and formatting
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: PHPStan
+        run: vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+
+      - name: Pint
+        run: vendor/bin/pint --test
